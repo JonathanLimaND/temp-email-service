@@ -1,0 +1,36 @@
+service: ndd-app-landing
+frameworkVersion: '3'
+
+provider:
+  name: aws
+  runtime: nodejs14.x
+  profile: jonathanlima
+  stage: dev
+  region: us-east-1
+  iam:
+    role:
+      managedPolicies:
+        - arn:aws:iam::aws:policy/AmazonAPIGatewayInvokeFullAccess
+      statements:
+        - Effect: Allow
+          Action:
+            - lambda:InvokeFunction
+            - ses:SendEmail
+
+          Resource:
+            - arn:aws:lambda:us-east-1:*:*
+            - arn:aws:ses:us-east-1:*:*
+  environment:
+    region: us-east-1
+
+functions:
+  sendEmail:
+    handler: handler.sendEmail
+    layers:
+      - arn:aws:lambda:us-east-1:141147875380:layer:aws-sdk:1
+    events:
+      - http:
+          path: send-email
+          method: POST
+          integration: lambda
+          cors: true
